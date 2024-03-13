@@ -1,0 +1,80 @@
+//Design Code
+module pe2x1(output reg out_21,valid,input en,input [1:0] in);
+  always@*
+    begin
+      if(en == 1'b1)
+        begin
+          if(in == 2'b00)
+            begin
+              out_21	= 1'b0;
+              valid = 1'b0;
+            end
+          else if(in == 2'b01)
+            begin
+              out_21 = 1'b0;
+              valid = 1'b1;
+            end
+          else if(in == 2'b10)
+            begin
+              out_21 = 1'b1;
+              valid = 1'b1;
+            end
+          else if(in == 2'b11)
+            begin
+              out_21 = 1'b1;
+              valid = 1'b1;
+            end
+          else 
+            begin
+              out_21 = 1'b0;
+              valid = 1'b0;
+            end
+        end
+      else 
+        begin
+          out_21 = 1'b0;
+          valid = 1'b0;
+        end
+    end
+endmodule
+
+
+module pe4x2_struct(output [1:0] out,output valid, input en, input [3:0] in);
+  wire o1,o0,valid0,out2;
+  pe2x1 PE1(o1,out[1],en,in[3:2]);
+  pe2x1 PE0(o0,valid0,en,in[1:0]);
+  assign valid = out[1] | valid0;
+  assign out2 = in[2] ? 0	:	in[1];
+  assign out[0] = o1 ? 1	:	out2;
+endmodule
+
+//Test Bench Code
+module tb();
+
+  wire [1:0] out;
+  wire valid;
+  reg en;
+  reg [3:0] in;
+  
+  pe4x2_struct DUT(out,valid,en,in);
+  integer i;
+  initial
+    begin
+      for(i=0;i<32;i=i+1)
+        begin
+          {en,in} = i;
+          #10;
+        end
+    end
+  initial
+    begin
+      $monitor("en = %b,in = %b, out = %b,valid = %b",en,in,out,valid);
+    end
+  initial
+    begin
+      $dumpfile"test.vcd");
+      $dumpvars(1);
+    end
+  
+endmodule
+
